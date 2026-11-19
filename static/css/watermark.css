@@ -99,3 +99,50 @@ th { color: var(--muted); font-weight: 500; }
   border: 1px dashed var(--line);
   border-radius: 14px;
 }
+.chips { display: flex; gap: 0.4rem; flex-wrap: wrap; margin: 0.5rem 0; }
+.err { color: var(--danger); }
+button[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+/* 窗界读数条：全页唯一读数源，四页共用 */
+.windowbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.2rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--muted);
+  border-radius: 12px;
+  background: #fff;
+}
+.windowbar:has(.tone-open) { border-left-color: #7bb32f; }
+.windowbar:has(.tone-pending) { border-left-color: #d9a441; }
+.windowbar:has(.tone-expired) { border-left-color: var(--danger); }
+.windowbar-main { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+.window-range { font-weight: 650; letter-spacing: 0.02em; }
+.windowbar-meter { display: flex; gap: 0.5rem; align-items: center; min-width: 220px; flex: 1; justify-content: flex-end; }
+.meter-track {
+  width: min(180px, 34vw);
+  height: 6px;
+  border-radius: 999px;
+  background: #e3e9e4;
+  overflow: hidden;
+}
+.meter-fill { height: 100%; border-radius: 999px; background: #7bb32f; }
+.meter-fill.tone-pending { background: #d9a441; }
+.meter-fill.tone-expired { background: var(--danger); }
+
+.chip.tone-open { background: #d8f2b0; color: #2c4a10; }
+.chip.tone-pending { background: #f7ecc9; color: #6b5210; }
+.chip.tone-expired { background: #f6d7d3; color: #7b241c; }
+.chip.tone-unknown { background: #e6e9e7; color: var(--muted); }
+
+.cards { display: grid; gap: 0.8rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.card { border: 1px solid var(--line); border-radius: 14px; padding: 0.8rem; background: #fff; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.card-head h3 { margin: 0; }
+.version-list { list-style: none; margin: 0.6rem 0 0; padding: 0; display: grid; gap: 0.35rem; }
+.version-list li { display: flex; gap: 0.45rem; flex-wrap: wrap; align-items: center; font-size: 0.86rem; }
+

@@ -1,8 +1,18 @@
 import pytest
 
 
+async def _open_window(authed, end="2026-11-30"):
+    """基线主链要在窗内跑：出厂窗界沿用原始种子（已过期），先由调度改窗延长。"""
+    r = await authed.post(
+        "/api/window",
+        json={"window_start": "2026-11-01", "window_end": end},
+    )
+    assert r.status == 200
+
+
 @pytest.mark.asyncio
 async def test_stamp_trace_gap_chain(authed):
+    await _open_window(authed)
     all_b = (await (await authed.get("/api/batches")).json())["items"]
     batches = [b for b in all_b if b["status"] == "待盖印"]
     assert batches

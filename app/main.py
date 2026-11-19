@@ -7,6 +7,7 @@ from itsdangerous import BadSignature, URLSafeSerializer
 from app.config import Config
 from app.db import init_db
 from app.services import (
+    describe_window,
     get_batch,
     list_batches,
     list_reports,
@@ -14,6 +15,7 @@ from app.services import (
     run_gap_report,
     stamp_batch,
     trace_downstream,
+    update_window,
 )
 from app.services.errors import ServiceError
 
@@ -123,9 +125,34 @@ async def api_meta(request: Request):
             "lab_name": Config.LAB_NAME,
             "product_line": "cc-watermark-lab",
             "chain": ["水印模板", "批次盖印", "下游追索", "缺口对账"],
-            "window": __import__("app.services.windows", fromlist=["effective_window"]).effective_window(),
+            "window": describe_window(),
         }
     )
+
+
+@app.router.get("/api/window")
+async def api_window(request: Request):
+    try:
+        require_user(request)
+    except ServiceError as exc:
+        return json_response({"error": exc.message}, exc.status_code)
+    return json_response({"window": describe_window()})
+
+
+@app.router.post("/api/window")
+async def api_window_update(request: Request):
+    try:
+        user = require_user(request)
+        body = await request.json()
+        window = update_window(
+            str(body.get("window_start", "")),
+            str(body.get("window_end", "")),
+            actor=user,
+            expected_revision=body.get("expected_revision"),
+        )
+    except ServiceError as exc:
+        return json_response({"ok": False, "error": exc.message}, exc.status_code)
+    return json_response({"ok": True, "window": window})
 
 
 @app.router.get("/api/templates")
@@ -135,8 +162,15 @@ async def api_templates(request: Request):
     except ServiceError as exc:
         return json_response({"error": exc.message}, exc.status_code)
     status = request.query.get("status")
-    status_val = status[0] if status else None
-    return json_response({"items": list_templates(status=status_val)})
+    table = request.query.get("table")
+    return json_response(
+        {
+            "items": list_templates(
+                status=status[0] if status else None,
+                table_name=table[0] if table else None,
+            )
+        }
+    )
 
 
 @app.router.get("/api/batches")
@@ -169,7 +203,10 @@ async def api_stamp(request: Request):
         require_user(request)
         batch_id = int(request.route_values["batch_id"])
         body = await request.json()
-        batch = stamp_batch(batch_id, str(body.get("watermark_value", "")))
+        batch = stamp_batch(
+            batch_id,
+            str(body.get("watermark_value", "")),
+        )
     except ServiceError as exc:
         return json_response({"ok": False, "error": exc.message}, exc.status_code)
     return json_response({"ok": True, "batch": batch})
